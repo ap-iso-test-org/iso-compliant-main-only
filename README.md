@@ -52,13 +52,21 @@ Some security settings depend on GitHub plan, organization policy, and token sco
 
 ## Repository Classification
 
-Repositories bootstrapped from this template are classified as ISO-compliant using:
+Repositories bootstrapped from this template are classified as ISO-compliant using organization custom properties as the source of truth:
 
-- Repository topics: `iso-compliant`, `iso-27001`, `production`, `main-only`, `github-template`.
-- Organization custom properties where available:
-  - `iso_classification=iso-compliant`
-  - `repo_template=iso-compliant-main-only`
-  - `branching_strategy=main-only`
+- `iso_classification=iso-compliant`
+- `repo_template=iso-compliant-main-only`
+- `branching_strategy=main-only`
+
+Repository topics are also applied as a convenience mirror for search and discovery:
+
+- `iso-compliant`
+- `iso-27001`
+- `production`
+- `main-only`
+- `github-template`
+
+Use custom properties for governance, reporting, and audit evidence. Use topics only for human-friendly discovery.
 
 ## Compliance Position
 
