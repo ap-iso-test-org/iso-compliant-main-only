@@ -1,0 +1,45 @@
+name: Validate release label
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - edited
+      - synchronize
+      - labeled
+      - unlabeled
+      - ready_for_review
+
+permissions:
+  pull-requests: read
+
+jobs:
+  validate-release-label:
+    name: Require exactly one release-impact label
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate labels
+        env:
+          LABELS_JSON: ${{ toJson(github.event.pull_request.labels) }}
+        run: |
+          set -euo pipefail
+
+          count="$(
+            printf '%s' "$LABELS_JSON" |
+              jq '[.[].name | select(. == "release:major" or . == "release:minor" or . == "release:patch" or . == "release:exempt")] | length'
+          )"
+
+          if [ "$count" -ne 1 ]; then
+            echo "PRs targeting main must have exactly one release-impact label:"
+            echo "- release:major"
+            echo "- release:minor"
+            echo "- release:patch"
+            echo "- release:exempt"
+            echo "Found $count release-impact labels."
+            exit 1
+          fi
+
+          echo "Release-impact label validation passed."
+

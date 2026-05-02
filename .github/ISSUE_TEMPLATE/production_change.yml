@@ -1,0 +1,74 @@
+name: Production Change
+description: Track a production-impacting change request.
+title: "[Change]: "
+labels:
+  - change
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template for production-impacting changes, deployment changes, infrastructure changes, or material data pipeline changes.
+  - type: input
+    id: owner
+    attributes:
+      label: Owner
+      description: Person or team accountable for the change.
+      placeholder: "@team or @person"
+    validations:
+      required: true
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Environment
+      options:
+        - production
+        - uat
+        - qa
+        - development
+        - multiple
+    validations:
+      required: true
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What is changing and why?
+    validations:
+      required: true
+  - type: textarea
+    id: risk
+    attributes:
+      label: Risk assessment
+      description: Describe security, availability, data, compliance, and operational risks.
+    validations:
+      required: true
+  - type: textarea
+    id: testing
+    attributes:
+      label: Testing evidence
+      description: Describe validation performed before production deployment.
+    validations:
+      required: true
+  - type: textarea
+    id: rollback
+    attributes:
+      label: Rollback plan
+      description: Describe how this change can be reverted or mitigated.
+    validations:
+      required: true
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Compliance checklist
+      options:
+        - label: Change has an accountable owner.
+          required: true
+        - label: Production impact is understood.
+          required: true
+        - label: Required approvals are identified.
+          required: true
+        - label: Deployment and rollback steps are documented.
+          required: true
+        - label: Monitoring or post-deployment validation is defined.
+          required: true
+

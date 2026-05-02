@@ -1,0 +1,15 @@
+# Example CODEOWNERS file.
+# Adjust owners to real GitHub users or teams before enforcing CODEOWNERS review.
+
+# Security-sensitive areas
+/.github/ @org/security-team
+/infra/ @org/platform-team
+/terraform/ @org/platform-team
+/deployment/ @org/platform-team
+/secrets/ @org/security-team
+
+# Data platform areas
+/models/ @org/data-platform-team
+/dbt/ @org/data-platform-team
+/pipelines/ @org/data-platform-team
+
