@@ -111,6 +111,12 @@ Some settings may not apply consistently through the API depending on plan and o
 - [ ] Confirm repository creation is restricted to owners or approved platform admins.
 - [ ] Confirm private/internal repository forking is disabled by default.
 - [ ] Confirm repository transfer is restricted.
+- [ ] Configure organization default labels from `docs/github-org-repository-defaults.md`.
+- [ ] Confirm default merge settings if available in the UI:
+  - squash merge enabled
+  - merge commit enabled
+  - rebase merge disabled
+  - auto-delete head branches enabled
 
 Suggested UI path:
 
@@ -120,6 +126,7 @@ Organization -> Settings -> Policies
 Organization -> Settings -> Actions -> General
 Organization -> Settings -> Security
 Organization -> Settings -> Repository -> Custom properties
+Organization -> Settings -> Repository -> Repository defaults
 ```
 
 ## 5. Create or Publish Approved Templates
@@ -149,6 +156,7 @@ Template includes:
 - `.github/examples/main-branch-protection-strict.json`
 - `.github/examples/org-ruleset-iso-compliant-main.json`
 - `docs/github-labels.md`
+- `docs/github-org-repository-defaults.md`
 - `docs/github-org-policy-baseline.md`
 - `github-compliance-engineering-guidance.md`
 - `scripts/bootstrap-main-only-repo.sh`
@@ -432,4 +440,3 @@ These should be resolved or configurable in the real GitHub Team company organiz
 10. Roll out to new repos.
 11. Inventory existing repos and classify them.
 12. Migrate existing repos into the right ruleset/template baseline.
-
