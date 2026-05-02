@@ -7,14 +7,112 @@ if [ "$#" -ne 1 ]; then
 fi
 
 repo="$1"
+owner="${repo%%/*}"
+repo_name="${repo##*/}"
 
 run_optional() {
   local description="$1"
+  local output
   shift
 
-  if ! "$@"; then
+  if ! output="$("$@" 2>&1)"; then
     echo "Warning: could not ${description}. This may require a different GitHub plan, token scope, or organization setting." >&2
+    if [[ "$output" == *"admin:org"* ]]; then
+      echo "Hint: GitHub custom properties require the admin:org scope. Run: gh auth refresh -h github.com -s admin:org" >&2
+    fi
   fi
+}
+
+set_repo_topics() {
+  local topics_json
+
+  topics_json="$(
+    gh api "repos/$repo/topics" --jq '.names' |
+      jq -c '. + ["iso-compliant", "iso-27001", "production", "main-only", "github-template"] | unique'
+  )"
+
+  local topics_file
+  topics_file="$(mktemp)"
+  jq -n --argjson names "$topics_json" '{names: $names}' >"$topics_file"
+
+  gh api \
+    --method PUT "repos/$repo/topics" \
+    --input "$topics_file" \
+    >/dev/null
+
+  rm -f "$topics_file"
+}
+
+set_org_custom_properties() {
+  local schema_file values_file
+
+  schema_file="$(mktemp)"
+  cat >"$schema_file" <<'JSON'
+{
+  "properties": [
+    {
+      "property_name": "iso_classification",
+      "value_type": "single_select",
+      "required": false,
+      "description": "ISO compliance classification for the repository.",
+      "allowed_values": [
+        "iso-compliant",
+        "iso-exempt"
+      ],
+      "values_editable_by": "org_actors"
+    },
+    {
+      "property_name": "repo_template",
+      "value_type": "string",
+      "required": false,
+      "description": "Governance template used to initialize the repository.",
+      "values_editable_by": "org_actors"
+    },
+    {
+      "property_name": "branching_strategy",
+      "value_type": "single_select",
+      "required": false,
+      "description": "Approved branching strategy for the repository.",
+      "allowed_values": [
+        "main-only",
+        "main-develop",
+        "prototype"
+      ],
+      "values_editable_by": "org_actors"
+    }
+  ]
+}
+JSON
+
+  gh api \
+    --method PATCH "orgs/$owner/properties/schema" \
+    --input "$schema_file" \
+    >/dev/null || {
+      rm -f "$schema_file"
+      return 1
+    }
+  rm -f "$schema_file"
+
+  values_file="$(mktemp)"
+  jq -n \
+    --arg repo_name "$repo_name" \
+    '{
+      repository_names: [$repo_name],
+      properties: [
+        {property_name: "iso_classification", value: "iso-compliant"},
+        {property_name: "repo_template", value: "iso-compliant-main-only"},
+        {property_name: "branching_strategy", value: "main-only"}
+      ]
+    }' >"$values_file"
+
+  gh api \
+    --method PATCH "orgs/$owner/properties/values" \
+    --input "$values_file" \
+    >/dev/null || {
+      rm -f "$values_file"
+      return 1
+    }
+  rm -f "$values_file"
 }
 
 echo "Configuring repository settings for $repo"
@@ -28,6 +126,10 @@ gh api \
   -f allow_merge_commit=true \
   -f allow_rebase_merge=false \
   >/dev/null
+
+echo "Applying repository classification metadata"
+run_optional "apply repository topics" set_repo_topics
+run_optional "apply organization custom properties" set_org_custom_properties
 
 echo "Configuring GitHub Actions permissions"
 run_optional "enable Actions with selected allowed actions" \
