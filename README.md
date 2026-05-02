@@ -61,7 +61,6 @@ Repositories bootstrapped from this template are classified as ISO-compliant usi
 Repository topics are also applied as a convenience mirror for search and discovery:
 
 - `iso-compliant`
-- `iso-27001`
 - `production`
 - `main-only`
 - `github-template`

@@ -28,7 +28,7 @@ set_repo_topics() {
 
   topics_json="$(
     gh api "repos/$repo/topics" --jq '.names' |
-      jq -c '. + ["iso-compliant", "iso-27001", "production", "main-only", "github-template"] | unique'
+      jq -c '(. - ["iso-27001"]) + ["iso-compliant", "production", "main-only", "github-template"] | unique'
   )"
 
   local topics_file
