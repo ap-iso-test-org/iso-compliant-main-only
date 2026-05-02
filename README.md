@@ -46,7 +46,9 @@ After creating a repository from this template:
 3. Confirm the release-label workflow runs on pull requests to `main`.
 4. Confirm force pushes and branch deletion are disabled for `main`.
 
-The bootstrap script creates labels, configures merge settings, disables rebase merge, enables delete-branch-on-merge, and applies strict `main` branch protection.
+The bootstrap script creates labels, configures merge settings, disables rebase merge, enables delete-branch-on-merge, restricts default Actions permissions, enables available code-security settings, and applies strict `main` branch protection.
+
+Some security settings depend on GitHub plan, organization policy, and token scope. If a setting cannot be applied, the script prints a warning and continues so the remaining controls are still configured.
 
 ## Compliance Position
 
