@@ -36,13 +36,18 @@ GitHub template repositories copy files, but they do not reliably copy all repos
 
 After creating a repository from this template:
 
-1. Create the recommended labels from `docs/github-labels.md`.
-2. Update `CODEOWNERS` with real teams or users.
-3. Apply the strict main branch protection example from `.github/examples/main-branch-protection-strict.json`.
-4. Confirm the release-label workflow runs on pull requests to `main`.
-5. Confirm force pushes and branch deletion are disabled for `main`.
+1. Update `CODEOWNERS` with real teams or users.
+2. Run the bootstrap script:
+
+   ```bash
+   scripts/bootstrap-main-only-repo.sh OWNER/REPO
+   ```
+
+3. Confirm the release-label workflow runs on pull requests to `main`.
+4. Confirm force pushes and branch deletion are disabled for `main`.
+
+The bootstrap script creates labels, configures merge settings, disables rebase merge, enables delete-branch-on-merge, and applies strict `main` branch protection.
 
 ## Compliance Position
 
 This template supports ISO 27001-aligned change control, traceability, review, and release governance. It does not make a repository compliant by itself. Teams must still configure access control, secrets, CI checks, deployment approvals, monitoring, and data handling according to repository risk.
-
