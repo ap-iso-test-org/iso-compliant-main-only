@@ -738,6 +738,77 @@ Use this default unless a repository has a documented reason to differ:
 - Use release PRs only where version files or curated changelogs must be committed.
 - Require deployment approvals separately from version calculation.
 
+## Signing-Key Onboarding
+
+Production repositories enforce required signed commits on `main` (`required_signatures: true`). This is a one-time setup per contributor.
+
+### Why Required Signed Commits
+
+A Git commit object stores an author name and email — both are user-controlled and trivially spoofable. Without signing, any contributor can produce commits that appear to come from any other person. Required signed commits make commit authorship cryptographically attributable: GitHub will only accept commits whose signature verifies against a key registered to a GitHub account whose email matches the commit author.
+
+This implements ISO 27001 A.5.33 (protection of records), A.8.5 (secure authentication), A.8.24 (use of cryptography), and A.8.32 (change management — non-repudiation of authorship).
+
+### Recommended Setup: SSH Signing
+
+SSH-key signing is the simplest path because most engineers already have an SSH key registered with GitHub. Available in Git 2.34 and later.
+
+1. Use an existing SSH key, or generate a new one:
+
+   ```bash
+   ssh-keygen -t ed25519 -C "you@company.com"
+   ```
+
+2. Register the public key with GitHub. In GitHub Settings → SSH and GPG keys → New SSH key, choose **Key type: Signing Key**. The same physical key can also be registered as an authentication key, but a signing-key registration must exist for verification to work.
+
+3. Configure local git to sign commits and tags using the SSH key:
+
+   ```bash
+   git config --global gpg.format ssh
+   git config --global user.signingkey ~/.ssh/id_ed25519.pub
+   git config --global commit.gpgsign true
+   git config --global tag.gpgsign true
+   ```
+
+4. Tell git which keys are trusted for signature verification (used by `git log --show-signature` locally; not required for GitHub-side verification, but useful for local tooling):
+
+   ```bash
+   mkdir -p ~/.config/git
+   echo "you@company.com $(cat ~/.ssh/id_ed25519.pub)" >> ~/.config/git/allowed_signers
+   git config --global gpg.ssh.allowedSignersFile ~/.config/git/allowed_signers
+   ```
+
+5. Verify a test commit:
+
+   ```bash
+   cd /tmp && mkdir signing-test && cd signing-test
+   git init -q && git commit --allow-empty -m "signing check"
+   git log --show-signature
+   ```
+
+### Alternative: GPG Signing
+
+GPG remains supported and is preferable in environments that already standardize on GPG (e.g. for package signing). The setup is more involved: generate a GPG key, export the public key, register it with GitHub, configure `user.signingkey` and `commit.gpgsign`. SSH signing is preferred for new setups.
+
+### Web UI and PR-Merge Commits
+
+Commits created through the GitHub web UI (web edits, PR merge button, issue auto-close commits) are signed automatically by GitHub's own internal key. They appear as "Verified" without any contributor setup. This means:
+
+- Merging PRs through the merge button does not require the merger to have a personal signing key.
+- Automation that authors commits via GitHub Apps signs with the App's identity.
+- Bot accounts must register signing keys if they push commits via Git (rather than the API).
+
+### Onboarding Checklist for New Engineers
+
+- [ ] Generate or identify an existing SSH key.
+- [ ] Register it as a Signing Key in GitHub.
+- [ ] Configure local git per the steps above.
+- [ ] Push a test commit and confirm "Verified" badge appears.
+- [ ] Confirm push to a protected branch is accepted.
+
+### Failure Mode
+
+A push of an unsigned commit to a branch with `required_signatures: true` is rejected by GitHub with a clear error message. The contributor either signs the commit (`git commit --amend -S`) or replays the work on top of a signed parent. There is no fallback to "merge anyway" for unsigned commits.
+
 ## Recommended Default
 
 Use this default unless a repository has a documented reason to differ:
@@ -746,6 +817,7 @@ Use this default unless a repository has a documented reason to differ:
 - Short-lived `feature/*`, `fix/*`, and `hotfix/*` branches.
 - Pull requests into `main`.
 - Required CI and review for production repositories.
+- Required signed commits on production `main` branches.
 - Lightweight controls for prototype repositories.
 - `develop`, `qa`, `uat`, and `release/*` only when tied to real environments, release processes, or support needs.
 

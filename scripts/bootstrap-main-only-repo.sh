@@ -224,4 +224,13 @@ gh api \
   --input .github/examples/main-branch-protection-strict.json \
   >/dev/null
 
+echo "Enabling required signed commits on main"
+run_optional "require signed commits on main" \
+  gh api --method POST "repos/$repo/branches/main/protection/required_signatures" \
+    >/dev/null
+
 echo "Repository bootstrap complete for $repo"
+echo
+echo "Reminder: required signed commits are now enforced on main."
+echo "Every contributor must register a signing key with GitHub and configure"
+echo "git locally. See 'Signing-key onboarding' in github-compliance-engineering-guidance.md."
