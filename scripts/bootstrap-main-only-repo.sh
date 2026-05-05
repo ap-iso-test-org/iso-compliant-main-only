@@ -120,12 +120,19 @@ gh api \
   --method PATCH "repos/$repo" \
   -f has_issues=true \
   -f has_wiki=false \
-  -f has_projects=false \
   -f delete_branch_on_merge=true \
   -f allow_squash_merge=true \
   -f allow_merge_commit=true \
   -f allow_rebase_merge=false \
   >/dev/null
+
+# `has_projects` is set in a separate call because GitHub returns HTTP 422 if
+# the org-level "repository projects" setting is disabled — even when the
+# request value matches that policy. Failure here is a no-op: the org-level
+# policy already prevents projects on this repo.
+run_optional "disable repository projects" \
+  gh api --method PATCH "repos/$repo" -F has_projects=false \
+    >/dev/null
 
 echo "Applying repository classification metadata"
 run_optional "apply repository topics" set_repo_topics
