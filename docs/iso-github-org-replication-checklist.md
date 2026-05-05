@@ -256,14 +256,17 @@ The bootstrap script configures:
 
 - Branch protection:
   - PR required.
-  - 1 approval required.
+  - 1 approval required (production); dummy single-user orgs may set 0 — see `docs/dummy-vs-production-deltas.md`.
   - Stale reviews dismissed.
   - Last-push approval required.
   - Required release-label status check.
   - Conversation resolution required.
+  - **Required signed commits enabled.**
   - Force pushes disabled.
   - Branch deletion disabled.
   - Admin enforcement enabled.
+
+  Each contributor must register a signing key with GitHub before they can push to a protected branch. See `github-compliance-engineering-guidance.md` "Signing-key onboarding".
 
 Verification:
 
@@ -391,40 +394,31 @@ Sensitive paths should require owners:
 
 ## 12. Evidence to Keep for Audit
 
-Keep screenshots or exports for:
+The full evidence inventory, ISO control mapping, and capture procedure are documented in:
 
-- Organization member privilege settings.
-- Actions policy settings.
-- Custom property schema.
-- Custom property values for repositories.
-- Rulesets.
-- Branch protection.
-- Repository labels.
-- CODEOWNERS.
-- PR template.
-- Required check results.
-- Example PR showing:
-  - linked ticket
-  - release label
-  - review
-  - passing checks
-  - merge through PR
-- Example release tag and release notes.
+- `docs/iso-27001-control-mapping.md` — ISO/IEC 27001:2022 Annex A → GitHub configuration.
+- `docs/iso-27001-evidence-inventory.md` — what to capture, how, and on what cadence.
+- `scripts/collect-audit-evidence.sh` — quarterly snapshot automation.
+
+Run the snapshot quarterly:
+
+```bash
+scripts/collect-audit-evidence.sh ORG ./evidence/$(date -u +%Y-Q%q)
+```
+
+Then capture the manual artifacts (UI screenshots, access-review record, audit-log export) listed at the bottom of the snapshot's `MANIFEST.txt` before committing the evidence directory to a controlled-access store.
 
 ## 13. Current Test Org Limitations
 
-Observed in `ap-iso-test-org`:
+The full list of dummy-vs-production deviations and the exact API or UI step to flip each on lives in `docs/dummy-vs-production-deltas.md`. Summary of headline gaps in `ap-iso-test-org`:
 
 - 2FA API call did not enable `two_factor_requirement_enabled`.
-- Some member privilege flags stayed enabled in the API:
-  - `members_can_delete_repositories`
-  - `members_can_change_repo_visibility`
-  - `members_can_invite_outside_collaborators`
-  - `members_can_create_teams`
+- Some member privilege flags stayed enabled in the API (`members_can_delete_repositories`, `members_can_change_repo_visibility`, `members_can_invite_outside_collaborators`, `members_can_create_teams`).
 - Org rulesets require GitHub Team or higher.
 - Branch protection on private repositories was unavailable on the Free test org until repositories were made public.
+- Default `required_approving_review_count` may be 0 on single-user dummy repos; production must always be 1+.
 
-These should be resolved or configurable in the real GitHub Team company organization.
+These should be resolved in the production GitHub Team organization. See `docs/dummy-vs-production-deltas.md` for the closure procedure.
 
 ## 14. Recommended Rollout Order
 

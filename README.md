@@ -26,9 +26,19 @@ Use this template for repositories where:
 - `.github/ISSUE_TEMPLATE/production_change.yml`
 - `.github/workflows/validate-release-label.yml`
 - `.github/examples/main-branch-protection-strict.json`
+- `.github/examples/org-ruleset-iso-compliant-main.json`
 - `CODEOWNERS`
 - `docs/github-labels.md`
-- `github-compliance-engineering-guidance.md`
+- `docs/github-org-policy-baseline.md` — org-level controls and production baseline.
+- `docs/github-org-repository-defaults.md` — org repository defaults.
+- `docs/iso-github-org-replication-checklist.md` — step-by-step org rollout.
+- `docs/iso-27001-control-mapping.md` — ISO/IEC 27001:2022 Annex A → GitHub controls.
+- `docs/iso-27001-evidence-inventory.md` — what evidence to capture and how.
+- `docs/dummy-vs-production-deltas.md` — what differs between this dummy org and a production org.
+- `github-compliance-engineering-guidance.md` — branch controls, merge strategy, signing-key onboarding, release governance.
+- `scripts/bootstrap-org-policies.sh` — apply org-level policy baseline.
+- `scripts/bootstrap-main-only-repo.sh` — bootstrap a main-only ISO-compliant repo.
+- `scripts/collect-audit-evidence.sh` — quarterly evidence snapshot.
 
 ## Required Setup After Creating a Repository
 
@@ -46,7 +56,9 @@ After creating a repository from this template:
 3. Confirm the release-label workflow runs on pull requests to `main`.
 4. Confirm force pushes and branch deletion are disabled for `main`.
 
-The bootstrap script creates labels, applies `iso-compliant` repository metadata, configures merge settings, disables rebase merge, enables delete-branch-on-merge, restricts default Actions permissions, enables available code-security settings, and applies strict `main` branch protection.
+The bootstrap script creates labels, applies `iso-compliant` repository metadata, configures merge settings, disables rebase merge, enables delete-branch-on-merge, restricts default Actions permissions, enables available code-security settings, applies strict `main` branch protection, and enables required signed commits on `main`.
+
+Required signed commits means every contributor must register a signing key with GitHub and configure local git accordingly before they can push to a protected branch. See "Signing-key onboarding" in `github-compliance-engineering-guidance.md`.
 
 Some security settings depend on GitHub plan, organization policy, and token scope. If a setting cannot be applied, the script prints a warning and continues so the remaining controls are still configured.
 
